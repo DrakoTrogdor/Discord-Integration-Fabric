@@ -16,7 +16,9 @@ import de.erdbeerbaerlp.dcintegration.fabric.command.McCommandDiscord;
 import de.erdbeerbaerlp.dcintegration.fabric.util.CompatibilityUtils;
 import de.erdbeerbaerlp.dcintegration.fabric.util.FabricMessageUtils;
 import de.erdbeerbaerlp.dcintegration.fabric.util.FabricServerInterface;
+import eu.pb4.placeholders.api.PlaceholderContext;
 import eu.pb4.styledchat.StyledChatEvents;
+import eu.pb4.placeholders.api.node.TextNode;
 import me.bymartrixx.playerevents.api.event.CommandExecutionCallback;
 import me.bymartrixx.playerevents.api.event.PlayerDeathCallback;
 import me.bymartrixx.playerevents.api.event.PlayerJoinCallback;
@@ -69,7 +71,7 @@ public class DiscordIntegration implements DedicatedServerModInitializer {
                 PlayerDeathCallback.EVENT.register(this::death);
                 CommandExecutionCallback.EVENT.register(this::command);
                 if (CompatibilityUtils.styledChatLoaded()) {
-                    StyledChatEvents.MESSAGE_CONTENT_SEND.register(this::styledChat);
+                    StyledChatEvents.MESSAGE_CONTENT.register(this::styledChat);
                 }
             } else {
                 System.err.println("Please check the config file and set an bot token");
@@ -154,15 +156,15 @@ public class DiscordIntegration implements DedicatedServerModInitializer {
     }
 
 
-    private Text styledChat(Text txt, ServerPlayerEntity player, boolean filtered) {
-        if (PlayerLinkController.getSettings(null, player.getUuid()).hideFromDiscord || filtered) {
+    private TextNode styledChat(TextNode txt, PlaceholderContext phContext) { //ServerPlayerEntity player, boolean filtered) {
+        if (PlayerLinkController.getSettings(null, phContext.player().getUuid()).hideFromDiscord ) {
             return txt;
         }
 
-        Text finalTxt = txt;
+        Text finalTxt = txt.toText();
         boolean cancelled = discord_instance.callEvent((e) -> {
             if (e instanceof FabricDiscordEventHandler) {
-                return ((FabricDiscordEventHandler) e).onMcChatMessage(finalTxt, player);
+                return ((FabricDiscordEventHandler) e).onMcChatMessage(finalTxt, phContext.player());
             }
             return false;
         });
@@ -178,7 +180,7 @@ public class DiscordIntegration implements DedicatedServerModInitializer {
             if (channel == null) {
                 return txt;
             }
-            discord_instance.sendMessage(FabricMessageUtils.formatPlayerName(player), player.getUuid().toString(), new DiscordMessage(embed, messageText, true), channel);
+            discord_instance.sendMessage(FabricMessageUtils.formatPlayerName(phContext.player()), phContext.player().getUuid().toString(), new DiscordMessage(embed, messageText, true), channel);
 
             final String json = Text.Serializer.toJson(txt);
             Component comp = GsonComponentSerializer.gson().deserialize(json);

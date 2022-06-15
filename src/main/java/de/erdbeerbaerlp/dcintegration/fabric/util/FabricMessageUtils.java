@@ -19,7 +19,7 @@ import net.minecraft.nbt.NbtList;
 import net.minecraft.nbt.NbtString;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
-import net.minecraft.text.TranslatableText;
+//import net.minecraft.text.TranslatableText;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.registry.Registry;
@@ -56,7 +56,7 @@ public class FabricMessageUtils extends MessageUtils {
                                     }
                                     final NbtCompound itemTag = is.getOrCreateNbt();
                                     final EmbedBuilder b = new EmbedBuilder();
-                                    String title = is.hasCustomName() ? is.getName().getString() : new TranslatableText(is.getItem().getTranslationKey()).getString();
+                                    String title = is.hasCustomName() ? is.getName().getString() : Text.translatable(is.getItem().getTranslationKey()).getString();
                                     if (title.isEmpty())
                                         title = is.getItem().getTranslationKey().toString();
                                     else
